@@ -9,3 +9,5 @@ openai
 google-generativeai 
 langchain
 pydantic-settings
+crewai
+crewai_tools
