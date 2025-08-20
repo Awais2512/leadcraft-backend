@@ -1,19 +1,31 @@
 [project]
 name = "leadcraft-backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "leadcraft-backend using crewAI, fastapi and supabase "
+authors = [{ name = "Muhammad Awais Jutt", email = "m.awais@mindrind.com" }]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "crewai>=0.165.1",
+    "crewai-tools>=0.62.3",
     "fastapi>=0.116.1",
     "google-generativeai>=0.8.5",
     "httpx>=0.28.1",
     "langchain>=0.3.27",
     "openai>=1.99.9",
-    "pydantic>=2.11.7",
+    "pydantic[email]>=2.11.7",
     "pydantic-settings>=2.10.1",
     "pyjwt>=2.10.1",
     "python-dotenv>=1.1.1",
     "supabase>=2.18.1",
     "uvicorn>=0.35.0",
+    "pyyaml>=6.0.2",
 ]
+
+
+[project.scripts]
+leadcraft_backend = "main:run"
+run_crew = "leadcraft_backend.main:run"
+train = "leadcraft_backend.main:train"
+replay = "leadcraft_backend.main:replay"
+test = "leadcraft_backend.main:test"
