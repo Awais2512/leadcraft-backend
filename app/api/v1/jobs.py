@@ -19,6 +19,8 @@ def create_job(data: JobCreate, user=Depends(verify_jwt)):
         "raw_post": data.raw_post,
         "parsed_needs": parsed,
     }).execute()
+    if not job.data:
+        raise ValueError("Failed to create job. Please try again later.")
 
     return JobResponse(**job.data[0])
 
@@ -26,4 +28,6 @@ def create_job(data: JobCreate, user=Depends(verify_jwt)):
 def list_jobs(user=Depends(verify_jwt)):
     user_id = user["sub"]
     jobs = supabase.table("jobs").select("*").eq("user_id", user_id).execute()
+    if not jobs.data:
+        return {"jobs": [], "message": "No jobs found."}
     return {"jobs": [JobResponse(**j) for j in jobs.data]}

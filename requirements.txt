@@ -11,3 +11,6 @@ langchain
 pydantic-settings
 crewai
 crewai_tools
+pydantic[email]
+pyyaml
+google-generativeai
