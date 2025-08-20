@@ -1,43 +1,133 @@
 tasks:
   refine_job_description:
     description: >
-      Take the raw job description provided by the client and rewrite
-      it into a refined, professional, and structured format.
-      Make it easier to understand by removing redundancies,
-      correcting grammar, and adding logical structure.
+      "You are given a raw client job description. "
+            "Your task is to act as an elite requirement architect and:\n\n"
+            "1. **Deeply Analyze** the job description, detecting any ambiguity, vagueness, or missing details.\n"
+            "2. **Refine & Rewrite** the job description into a professional, structured, "
+            "and implementation-ready requirements document. Ensure it is easy to edit.\n"
+            "3. **Highlight Risks & Assumptions** explicitly (if the client’s description lacks clarity).\n"
+            "4. **Format the Refined Output** into sections:\n"
+            "   - Project Overview\n"
+            "   - Objectives\n"
+            "   - Scope of Work\n"
+            "   - Deliverables\n"
+            "   - Assumptions\n"
+            "   - Constraints\n"
+            "   - Dependencies\n"
+            "   - Acceptance Criteria\n\n"
+            "Client Provided Job Description:\n"
       
       Raw description:
       {raw_description}
     expected_output: >
-      A clear and professional refined job description with bullet points,
-      categorized sections, and concise requirements.
+      "Return output as a well-structured text document with clear Markdown-style headings. "
+            "The document must include the following sections:\n\n"
+            "## Project Overview\n"
+            "## Objectives\n"
+            "## Scope of Work\n"
+            "## Deliverables\n"
+            "## Assumptions\n"
+            "## Constraints\n"
+            "## Dependencies\n"
+            "## Acceptance Criteria\n\n"
     agent: job_refiner_agent
 
-  generate_clarification_questions:
-    description: >
-      Analyze the refined job description and identify unclear or
-      ambiguous points. Write a set of clarification questions that
-      the freelancer should ask the client.
-    expected_output: >
-      A JSON list of clarification questions, grouped by category
-      (requirements, timeline, budget, scope).
-    agent: question_generator_agent
-    context:
-      - refine_job_description
+generate_clarification_questions:
+  description: >
+    You are tasked with reviewing the refined job description and
+    uncovering every ambiguity, assumption, or missing detail that could
+    create confusion later in the project. Your mission is to think like
+    a top-tier consultant and produce a set of highly professional,
+    thoughtful clarification questions that the freelancer should ask
+    the client before starting work.
+  expected_output: >
+    A **valid JSON object** with the following structure:
+    {
+      "requirements": [
+        "Question 1",
+        "Question 2",
+        ...
+      ],
+      "timeline": [
+        "Question 1",
+        "Question 2",
+        ...
+      ],
+      "budget": [
+        "Question 1",
+        "Question 2",
+        ...
+      ],
+      "scope": [
+        "Question 1",
+        "Question 2",
+        ...
+      ]
+    }
 
-  extract_skills_and_match:
-    description: >
-      From the refined job description, extract all required skills,
-      tools, and technologies. Compare them against the user's profile
-      skills:
-      {user_profile_skills}
+    Rules for output:
+    - Do NOT invent details; only ask based on ambiguities in the job description.
+    - Each question must be open-ended, clear, and professional.
+    - Avoid yes/no questions.
+    - Each category should contain at least 2–3 strong questions.
+    - If a category is not mentioned in the job description, still include it
+      with relevant clarification questions.
+    - Output must be strictly valid JSON.
+  agent: question_generator_agent
+  context:
+    - refine_job_description
 
-      Mark each skill as "exact", "near", or "missing".
-    expected_output: >
-      A JSON object with three lists:
-      - exact_matches: []
-      - near_matches: []
-      - missing_skills: []
-    agent: skill_extractor_agent
-    context:
-      - refine_job_description
+
+extract_skills_and_match:
+  description: >
+    You are tasked with analyzing the refined job description and
+    extracting every required skill, tool, technology, and methodology
+    explicitly mentioned or logically implied. Then, compare them against
+    the user's profile skills:
+    {user_profile_skills}
+
+    Each extracted skill must be classified into one of three categories:
+      1. "exact"   – Skill appears explicitly in both the job description
+                     and the user profile skills.
+      2. "near"    – Skill is not an exact match but is closely related,
+                     interchangeable, or transferable (e.g. "TensorFlow"
+                     in JD vs. "PyTorch" in profile).
+      3. "missing" – Skill is required in the job description but not
+                     found in the user profile.
+  expected_output: >
+    A **strictly valid JSON object** in the following format:
+    {
+      "exact_matches": [
+        "Skill 1",
+        "Skill 2",
+        ...
+      ],
+      "near_matches": [
+        "Skill 1",
+        "Skill 2",
+        ...
+      ],
+      "missing_skills": [
+        "Skill 1",
+        "Skill 2",
+        ...
+      ]
+    }
+
+    Rules for output:
+    - Do NOT invent or assume skills that are not mentioned or implied.
+    - Always normalize skills to a consistent format (e.g. "Python"
+      instead of "python" or "PYTHON").
+    - Always classify all skills into one of the three categories —
+      no unclassified items.
+    - Include both hard skills (programming languages, tools, frameworks)
+      and soft skills (communication, problem-solving) if they appear in
+      the job description.
+    - Ensure the JSON is properly formatted, without commentary, notes,
+      or extra fields.
+    - If a category has no items, return an empty list.
+  agent: skill_extractor_agent
+  context:
+    - refine_job_description
+
