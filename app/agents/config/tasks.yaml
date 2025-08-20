@@ -1,0 +1,43 @@
+tasks:
+  refine_job_description:
+    description: >
+      Take the raw job description provided by the client and rewrite
+      it into a refined, professional, and structured format.
+      Make it easier to understand by removing redundancies,
+      correcting grammar, and adding logical structure.
+      
+      Raw description:
+      {raw_description}
+    expected_output: >
+      A clear and professional refined job description with bullet points,
+      categorized sections, and concise requirements.
+    agent: job_refiner_agent
+
+  generate_clarification_questions:
+    description: >
+      Analyze the refined job description and identify unclear or
+      ambiguous points. Write a set of clarification questions that
+      the freelancer should ask the client.
+    expected_output: >
+      A JSON list of clarification questions, grouped by category
+      (requirements, timeline, budget, scope).
+    agent: question_generator_agent
+    context:
+      - refine_job_description
+
+  extract_skills_and_match:
+    description: >
+      From the refined job description, extract all required skills,
+      tools, and technologies. Compare them against the user's profile
+      skills:
+      {user_profile_skills}
+
+      Mark each skill as "exact", "near", or "missing".
+    expected_output: >
+      A JSON object with three lists:
+      - exact_matches: []
+      - near_matches: []
+      - missing_skills: []
+    agent: skill_extractor_agent
+    context:
+      - refine_job_description
