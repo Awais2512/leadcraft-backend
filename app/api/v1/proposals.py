@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.security import verify_jwt
 from app.services.supabase_client import supabase
 from app.schemas.proposals import ProposalCreate, ProposalResponse, ProposalListResponse
-from app.agents import crew_runner
+from app.agents.crew import LeadCraftCrew
 router = APIRouter()
 
 @router.post("/", response_model=ProposalResponse)
@@ -17,11 +17,19 @@ def create_proposal(data: ProposalCreate, user=Depends(verify_jwt)):
     if not profile.data:
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    proposal_text = crew_runner.run_proposal(
-        job_post=job.data["raw_post"],
-        profile=profile.data,
-        tone=data.tone,
-    )
+    # Initialize crew and generate proposal
+    crew = LeadCraftCrew()
+    
+    # Temporary implementation - you'll need to implement run_proposal method
+    # or use the JobRefinerCrew for proposal generation
+    proposal_text = f"Generated proposal for job: {job.data.get('title', 'Job')} using {data.tone} tone"
+    
+    # TODO: Implement proper proposal generation using CrewAI
+    # proposal_text = crew.run_proposal(
+    #     job_post=job.data["raw_post"],
+    #     profile=profile.data,
+    #     tone=data.tone,
+    # )
     proposal = supabase.table("proposals").insert({
         "user_id": user_id,
         "job_id": data.job_id,

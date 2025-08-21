@@ -1,0 +1,185 @@
+tasks:
+  initial_project_analysis:
+    description: >
+      Analyze the raw project description provided by the user. Your task is to:
+      
+      1. **Understand the Scope**: Determine if this is a job, project, service, or consultation request
+      2. **Assess Complexity**: Evaluate the complexity level (simple, moderate, complex, enterprise)
+      3. **Identify Industry**: Determine the primary industry or domain
+      4. **Initial Structure**: Provide a high-level breakdown of what the request involves
+      5. **Risk Assessment**: Identify any obvious red flags or areas of concern
+      
+      Raw Project Description:
+      {raw_description}
+      
+      Analyze this description thoroughly and provide your assessment.
+    expected_output: >
+      A structured analysis containing:
+      - Project Type Classification (Job/Project/Service/Consultation)
+      - Complexity Level (Simple/Moderate/Complex/Enterprise)
+      - Primary Industry/Domain
+      - High-level scope breakdown
+      - Initial risk assessment
+      - Recommended next steps
+    agent: project_analyzer_agent
+    async_execution: false
+    markdown: true
+
+  detect_ambiguities_and_generate_questions:
+    description: >
+      Based on the initial project analysis, systematically identify all ambiguities, 
+      missing details, and areas requiring clarification. Your task is to:
+      
+      1. **Analyze the Description**: Review the raw description for unclear areas
+      2. **Identify Missing Information**: Spot details that are not specified
+      3. **Generate Questions**: Create professional, targeted questions for each ambiguity
+      4. **Categorize Questions**: Organize questions by priority and category
+      5. **Risk Assessment**: Focus on questions that could prevent project success
+      
+      Use the initial analysis context to focus your ambiguity detection.
+      
+      Raw Description: {raw_description}
+      Initial Analysis: {initial_analysis}
+    expected_output: >
+      A comprehensive ambiguity analysis with:
+      - List of identified ambiguities
+      - Categorized clarification questions (High/Medium/Low priority)
+      - Questions organized by category (Scope, Timeline, Budget, Technical, etc.)
+      - Risk level for each ambiguity
+      - Recommended approach for each question category
+    agent: ambiguity_detector_agent
+    context:
+      - initial_project_analysis
+    async_execution: false
+    markdown: true
+
+  manage_client_interaction:
+    description: >
+      Present the generated clarification questions to the client and manage their responses. 
+      Your task is to:
+      
+      1. **Present Questions Professionally**: Format and present questions in a client-friendly manner
+      2. **Collect Client Responses**: Gather answers to the clarification questions
+      3. **Handle Skipped Questions**: Process cases where clients choose not to answer
+      4. **Integrate Feedback**: Synthesize all client responses into actionable context
+      5. **Determine Completeness**: Assess if enough information is available to proceed
+      
+      Clarification Questions: {clarification_questions}
+      Client Responses: {client_responses}
+      
+      If client_responses is empty or None, assume no responses were provided.
+    expected_output: >
+      A comprehensive client interaction summary containing:
+      - Questions presented to client
+      - Client responses received
+      - Skipped questions and reasons (if any)
+      - Integrated feedback context
+      - Assessment of information completeness
+      - Recommendations for proceeding
+    agent: client_interaction_agent
+    context:
+      - detect_ambiguities_and_generate_questions
+    async_execution: false
+    markdown: true
+
+  extract_technical_skills:
+    description: >
+      Analyze the project description and any client feedback to extract and categorize 
+      all required technical skills, tools, technologies, and methodologies. Your task is to:
+      
+      1. **Identify Explicit Skills**: Extract skills directly mentioned in the description
+      2. **Infer Implicit Skills**: Identify skills that are logically required but not stated
+      3. **Categorize Skills**: Organize skills by type (Programming, Design, Management, etc.)
+      4. **Assess Skill Levels**: Determine required proficiency levels
+      5. **Identify Skill Gaps**: Note any critical skills that might be missing
+      
+      Raw Description: {raw_description}
+      Client Feedback: {client_feedback}
+      
+      Focus on both hard technical skills and soft skills that are relevant.
+    expected_output: >
+      A comprehensive skills analysis containing:
+      - Explicit skills mentioned in description
+      - Implicit skills logically required
+      - Skills categorized by type and importance
+      - Required proficiency levels
+      - Critical skill gaps identified
+      - Recommendations for skill requirements
+    agent: skill_extractor_agent
+    context:
+      - initial_project_analysis
+      - manage_client_interaction
+    async_execution: false
+    markdown: true
+
+  classify_project_type:
+    description: >
+      Based on all available information, provide a final classification of the project type, 
+      category, and characteristics. Your task is to:
+      
+      1. **Final Classification**: Determine the exact project type and category
+      2. **Industry Classification**: Provide industry-specific categorization
+      3. **Complexity Confirmation**: Confirm the final complexity assessment
+      4. **Project Management Approach**: Suggest appropriate methodologies
+      5. **Resource Requirements**: Estimate team size and expertise needed
+      
+      Use all previous analysis and client feedback to make the final classification.
+      
+      Initial Analysis: {initial_analysis}
+      Skills Analysis: {skills_analysis}
+      Client Feedback: {client_feedback}
+    expected_output: >
+      A final project classification containing:
+      - Project Type (Job/Project/Service/Consultation)
+      - Primary Category and Subcategory
+      - Industry Classification
+      - Final Complexity Assessment
+      - Recommended Project Management Approach
+      - Estimated Resource Requirements
+      - Project Characteristics Summary
+    agent: project_classifier_agent
+    context:
+      - initial_project_analysis
+      - extract_technical_skills
+      - manage_client_interaction
+    async_execution: false
+    markdown: true
+
+  create_final_refined_description:
+    description: >
+      Create a comprehensive, professional, and implementation-ready project requirements 
+      document. Integrate all available information including:
+      
+      1. **Initial Analysis**: Project scope and complexity
+      2. **Client Feedback**: All clarifications and responses
+      3. **Skills Requirements**: Technical and non-technical skills needed
+      4. **Project Classification**: Final type and category
+      5. **Risk Mitigation**: Address identified risks and ambiguities
+      
+      Your output should be a professional document that any team can use to start work.
+      
+      All Previous Analysis: {all_analysis}
+      Client Feedback: {client_feedback}
+      Skills Analysis: {skills_analysis}
+      Project Classification: {project_classification}
+    expected_output: >
+      A professional project requirements document containing:
+      - Executive Summary
+      - Project Overview and Objectives
+      - Detailed Scope of Work
+      - Technical Requirements and Skills
+      - Deliverables and Acceptance Criteria
+      - Timeline and Milestones
+      - Risk Assessment and Mitigation
+      - Assumptions and Constraints
+      - Success Criteria
+      - Next Steps and Recommendations
+    agent: description_refiner_agent
+    context:
+      - initial_project_analysis
+      - detect_ambiguities_and_generate_questions
+      - manage_client_interaction
+      - extract_technical_skills
+      - classify_project_type
+    async_execution: false
+    markdown: true
